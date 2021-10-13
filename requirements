@@ -1,0 +1,230 @@
+
+Phase 1 - automated randomizer
+Phase 2 - record user actions
+Phase 3 - DB persistance
+Phase 4 - Analyze reports
+
+other req
+	- user experience (material UI, mobile form factor RWD)7
+	- i18n
+	- remove external js css dependency
+	- refactor codes
+	- persistence
+	- multigame support
+	- set up git
+	
+
+root
+
+
+[I am the host]
+[I am joining game]
+
+
+/secrethost0504
+
+	host name: [ 		]
+	game name: [      ]
+	number of players:	[	]
+	roles:
+		1
+		2
+		3
+		4
+		5
+		6
+		7
+
+	choose template [dropdown]
+
+	[Create Game]
+
+	"Waiting for players..."
+	"Zotong has joined the game..."
+	"Alvin has joined the game..."
+
+	"All players joined"
+
+	[Starts Game]
+	[Randomizing players to roles]
+
+	"Randomization Results:
+		Player 1 - Alvin (Wolf King)
+		Player 2 - Zotong (Seer)
+	"
+
+	[Randomize Starting Speaker]
+
+	Phase 2
+	[Night 1 starts]
+
+	"Night 1 starting... All players are asked to close their eyes"
+
+	[Wolf Action Starts]
+	"Wolves players are asked to open their eyes (of course you need to announce it)"
+
+	[Wolf to start choose victim]
+	"Wolves players can now choose their victim"
+
+	"Player 1 (Alvin) has selected his victim as Player X (ABC)"
+	"Player 3 (ABC) has selected his victim as Player X (ABC)"
+	"All wolves have voted on the same victim Player Y (ABC)"
+
+	[Wolf Action Ends]
+
+
+	[Witch Action Starts]
+	"Witch Player X (ABC) is asked to open their eyes (of course you need to announce it)"
+	"Witch Player X (ABC) has chosen to save/not save the victim"
+
+	"Witch Player X (ABC) chose to poison Player X (ABC)"
+	[Witch Action Ends]
+
+	[Seer Action Starts]
+	"Seer Player X (ABC) is asked to open their eyes (of course you need to announce it)"	
+
+	"Seer Player X (ABC) has examined Player X (ABC) to be GOOD/BAD"
+	[Seer Action Ends]
+
+
+	[Night 1 Ends / Day 1 Starts]
+	"All players are asked to open their eyes (of course you need to announce it)"
+
+	"Yesterday, Player A[, B[, C]] was/were killed"
+	"Yesterday, nobody was killed"
+	"Player X (ABC) to start his/her speech"
+
+	[Finish Player X speech]
+
+	[Voting Starts]
+	"All players are asked to vote"
+	"1/7 players have casted their votes"
+	"2/7 players have casted their votes"
+	"7/7 players have casted their votes"
+
+	"Voting Results:
+	Player X (ABC) voted Nil
+	Player X (ABC) voted Player Y (ABC)
+	Player X (ABC) voted Player Z (ABC)
+
+	Player X (ABC) is voted out
+	"
+
+		"There is a tie between Player X, Player Y, Player Z"
+		"Start 2nd round speech"
+		"Player X (ABC) to start his/her speech"
+		[I finished my speech]
+
+		"Please vote"
+		[	][Vote]
+
+		"1/4 players have casted their votes"
+		"2/4 players have casted their votes"
+		"4/4 players have casted their votes"
+
+		"Voting Results:
+		Player X (ABC) voted Nil
+		Player X (ABC) voted Player Y (ABC)
+		Player X (ABC) voted Player Z (ABC)
+
+		Player X (ABC) is voted out
+		"
+		"No one is voted out today"
+
+	[Day 1 Ends / Night 2 Starts]
+
+
+=================================================================
+/
+	player name: [		]
+	game name: [		]
+
+	[Join]
+
+	"Waiting for other players to join..."
+	"All players joined"
+	"Waiting for host to start the game..."
+	"Game Started"
+	"You are player number X, and today you are Y"
+
+	Phase 2
+	"Night 1 started, please close your eyes"
+
+	"You are wolf, please open your eyes (of course you can't see this)"
+
+	"Your wolf ally Player 1 (Alvin) is a Wolf King"
+	"Your wolf ally Player 5 (ABC) is a Wolf"
+
+	"Please choose your victim"
+	[	] [Kill]
+
+	"You have selected player X (ABC)"
+	"Your wolf ally Player 1 (Alvin) has selected player Y (XYZ)"
+	"All wolves have voted on the same victim Player Y (ABC)"
+
+	"Wolf player, please close your eyes"
+
+	"You are witch, please open your eyes (of course you can't see this)"
+
+	"Player X (ABC) is killed. Do you want to save him/her?"
+	[Yes][No]
+
+	"You chose to save/not save the victim Player X (ABC)"
+
+	"Do you want to use your poison?"
+	[	][Yes][No]
+
+	"You chose to poison Player X (ABC)"
+
+
+	"You are seer, please open your eyes (of course you can't see this)"
+
+	"Select the player you want to examine"
+	[	][Examine]
+
+	"Player X (ABC) is GOOD/BAD"
+
+
+	"All players please open your eyes (of course you can't see this)"
+
+	"Yesterday, Player A[, B[, C]] was/were killed"
+	"Yesterday, nobody was killed"
+	"Player X (ABC) to start his/her speech"
+
+	[I finished my speech]
+
+	"Please vote"
+	[	][Vote]
+
+	"1/7 players have casted their votes"
+	"2/7 players have casted their votes"
+	"7/7 players have casted their votes"
+
+	"Voting Results:
+	Player X (ABC) voted Nil
+	Player X (ABC) voted Player Y (ABC)
+	Player X (ABC) voted Player Z (ABC)
+
+	Player X (ABC) is voted out
+	"
+
+		"There is a tie between Player X, Player Y, Player Z"
+		"Start 2nd round speech"
+		"Player X (ABC) to start his/her speech"
+		[I finished my speech]
+
+		"Please vote"
+		[	][Vote]
+
+		"1/4 players have casted their votes"
+		"2/4 players have casted their votes"
+		"4/4 players have casted their votes"
+
+		"Voting Results:
+		Player X (ABC) voted Nil
+		Player X (ABC) voted Player Y (ABC)
+		Player X (ABC) voted Player Z (ABC)
+
+		Player X (ABC) is voted out
+		"
+		"No one is voted out today"

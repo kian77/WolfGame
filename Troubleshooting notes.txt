@@ -1,0 +1,22 @@
+Troubleshooting notes
+
+
+1. orbi admin at 192.168.1.1
+	port forwarding 192.168.1.13 (desktop internal ip) port 8000
+2. update settings
+	ALLOWED_HOSTS = ['116.197.243.175']
+3. run server with
+	python manage.py runserver 0.0.0.0:8000
+
+
+4. init
+		setpath
+		pipenv shell
+		python manage.py runserver 0.0.0.0:8000
+
+
+5. urls
+
+	http://localhost:8000/wolves
+	http://localhost:8000/wolves/getEventLogs
+	http://localhost:8000/wolves/addLogUI

@@ -1,0 +1,148 @@
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link href="https://www.jquery-az.com/jquery/css/jquery.multiselect.css" rel="stylesheet" type="text/css">
+  <script src="https://www.jquery-az.com/jquery/js/multiselect-checkbox/jquery.multiselect.js"></script>
+</head> 
+
+Host Console2
+<br>
+<div id="logDisplay" style="overflow:scroll; width:800px; height:400px; font-style: italic; color: green;">
+</div>
+
+<br>
+<div>
+	<br><button id="updateLog">Update</button>
+
+	<br>
+	<div id="GAME_NOT_CREATED">
+			<br>Your Name: <input type="text" id="hostName" size="30">
+			<br>Game Name: <input type="text" id="gameName" size="30">
+			<br>Number of Players: <input type="text" id="numberOfPlayers" size="2">
+			<br><button id="createGame">Create Game</button>		
+	</div>
+	<div id="GAME_CREATED">
+		<br>Number of Players : <span id="showNumberOfPlayers">123</span>
+		<br>Please select roles to be included (<span id="showNumberOfRolesSelected">0</span> roles selected)
+		<select id="rolesSelected" multiple="multiple" class="4colactive">
+        <option value="PEASANT1">平民</option>	
+        <option value="PEASANT2">平民</option>	
+        <option value="PEASANT3">平民</option>	
+        <option value="PEASANT4">平民</option>	
+        <option value="SEER1">预言家</option>	
+        <option value="WITCH1">女巫</option>	
+        <option value="HUNTER1">猎人</option>	
+        <option value="KNIGHT1">骑士</option>	
+        <option value="WOLF1">狼人</option>	
+        <option value="WOLF2">狼人</option>	
+        <option value="WOLF3">狼人</option>	
+        <option value="WOLF_KING1">狼王</option>	
+        <option value="WOLF_KING2">狼王</option>	
+        <option value="SNOW_WOLF1">雪狼</option>
+    </select>
+
+			<br><button id="openGame">Open Game</button>		
+	</div>
+
+	<br><div id="systemMessage" style="font-style: italic; color: red;"></div>
+</div>
+
+<script>
+var latest = 0;
+refreshActionDisplay("GAME_NOT_CREATED");
+
+
+function appendEventLog(divID, newEventID, newEventDescription, newEventTimestamp) {
+	var div1 = document.getElementById(divID);
+	div1.innerHTML = div1.innerHTML + "<br>" +
+										"<span style='color: blue'>" + (newEventID+1) + ". &nbsp;&nbsp;</span>" + 
+										"<span style='color: green'>" + newEventDescription + "&nbsp;&nbsp;</span>" +
+										"<span style='color: red'>[" + newEventTimestamp + "]</span>";
+	div1.scrollTop = div1.scrollHeight;	//scrolls to the bottom so that latest events are displayed
+}
+
+$("#updateLog").click(function() { refresh(); }); 
+
+function refresh() {
+  $.get("./getEventLogs?latest="+latest, function(data, status){
+  	logs = JSON.parse(data);
+  	latest += logs.length;
+  	for (const log of logs)
+	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
+  });
+}
+
+$("#createGame").click(function() { createGame(); }); 
+
+function createGame() {
+  $.get("./sendAction?latest="+latest+"&action=createGame&p1="+$("#hostName").val().trim()+"&p2="+$("#gameName").val().trim()+"&p3="+$("#numberOfPlayers").val().trim(), function(data, status){
+  	//alert("["+data+"]");
+  	actionResponse = JSON.parse(data);
+  	$("#systemMessage").html(actionResponse.systemMessage);
+  	logs = actionResponse.eventLogs;
+  	latest += logs.length;
+  	for (const log of logs)
+	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
+	  $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
+	  refreshActionDisplay(actionResponse.gameState);
+  });
+}
+
+$("#openGame").click(function() { openGame(); }); 
+
+function openGame() {
+
+	var requestJson = { 'action': 'openGame',
+											'rolesSelected': $("#rolesSelected").val(),
+											'latest': latest
+										};
+	$.ajax({
+		url: './sendAction',
+		type: 'POST',
+		contentType: 'application/json; charset=utf-8',
+		data: JSON.stringify(requestJson),
+		dataType: 'text',
+		success: function(data, status) {
+			alert(data);
+			actionResponse = JSON.parse(data);
+	  	$("#systemMessage").html(actionResponse.systemMessage);
+	  	logs = actionResponse.eventLogs;
+	  	latest += logs.length;
+	  	for (const log of logs)
+		  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
+		  $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
+		  refreshActionDisplay(actionResponse.gameState);
+			}
+	});
+
+}
+
+function refreshActionDisplay(gameState) {
+	var actionCards = [ "GAME_NOT_CREATED", "GAME_CREATED"];
+
+	for (const card of actionCards) {
+			if (gameState==card) {
+				$("#"+card).show();
+			} else {
+				$("#"+card).hide();				
+			}
+	}
+
+}
+
+$('select[multiple]').multiselect({
+    columns: 4,
+    placeholder: 'Select options'
+});
+
+
+$("#rolesSelected").change(function() {
+    var selectedValues = $("#rolesSelected").val();
+    $("#showNumberOfRolesSelected").html(selectedValues.length);
+    //alert(selectedValues);
+});
+
+
+</script>
+</html>

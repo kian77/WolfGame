@@ -1,0 +1,84 @@
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <link href="https://www.jquery-az.com/jquery/css/jquery.multiselect.css" rel="stylesheet" type="text/css">
+  <script src="https://www.jquery-az.com/jquery/js/multiselect-checkbox/jquery.multiselect.js"></script>
+</head> 
+
+Player Console
+<br>
+<div id="logDisplay" style="overflow:scroll; width:800px; height:400px; font-style: italic; color: green;">
+</div>
+
+<br>
+<div>
+	<br><button id="updateLog">Update</button>
+
+	<br>
+	<div id="LANDING">
+			<br>Your Name: <input type="text" id="playerName" size="30">
+			<br>Joining Game (provided by host): <input type="text" id="gameName" size="30">
+			<br><button id="joinGame">Join Game</button>		
+	</div>
+
+	<br><div id="systemMessage" style="font-style: italic; color: red;"></div>
+</div>
+
+<script>
+var latest = 0;
+refreshActionDisplay("LANDING");
+
+
+function appendEventLog(divID, newEventID, newEventDescription, newEventTimestamp) {
+	var div1 = document.getElementById(divID);
+	div1.innerHTML = div1.innerHTML + "<br>" +
+										"<span style='color: blue'>" + (newEventID+1) + ". &nbsp;&nbsp;</span>" + 
+										"<span style='color: green'>" + newEventDescription + "&nbsp;&nbsp;</span>" +
+										"<span style='color: red'>[" + newEventTimestamp + "]</span>";
+	div1.scrollTop = div1.scrollHeight;	//scrolls to the bottom so that latest events are displayed
+}
+
+$("#updateLog").click(function() { refresh(); }); 
+
+function refresh() {
+  $.get("./getEventLogs?latest="+latest, function(data, status){
+  	logs = JSON.parse(data);
+  	latest += logs.length;
+  	for (const log of logs)
+	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
+  });
+}
+
+$("#joinGame").click(function() { joinGame(); }); 
+
+function joinGame() {
+  $.get("./sendAction?latest="+latest+"&action=joinGame&p1="+$("#playerName").val().trim()+"&p2="+$("#gameName").val().trim(), function(data, status){
+  	//alert("["+data+"]");
+  	actionResponse = JSON.parse(data);
+  	$("#systemMessage").html(actionResponse.systemMessage);
+  	logs = actionResponse.eventLogs;
+  	latest += logs.length;
+  	for (const log of logs)
+	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
+	  $("#showNumberOfPlayers").html($("#numberOfPlayers").val());
+	  refreshActionDisplay(actionResponse.gameState);
+  });
+}
+
+function refreshActionDisplay(gameState) {
+	var actionCards = [ "GAME_NOT_CREATED", "GAME_CREATED"];
+
+	for (const card of actionCards) {
+			if (gameState==card) {
+				$("#"+card).show();
+			} else {
+				$("#"+card).hide();				
+			}
+	}
+
+}
+
+
+</script>
+</html>

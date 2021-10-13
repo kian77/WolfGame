@@ -1,0 +1,31 @@
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head> 
+
+Super Admin Console
+<br>
+<br>
+<pre id="displayModel" style="overflow:scroll; width:1000px; height:600px; font-style: bold; color: blue;">
+</pre>
+
+
+<input type="text" id="command" value="" size="200">
+<br>
+<button>send command</button>
+
+<script>
+var latest = 0;
+
+$("button").click(function(){
+  $.get("getGameModel?command="+document.getElementById("command").value, function(data, status){
+  	var gameModelAsJson = JSON.parse(data);
+  	var gameModelAsString = JSON.stringify(gameModelAsJson, undefined, 2);
+  	var displayModelDiv = document.getElementById("displayModel");
+  	displayModelDiv.textContent = gameModelAsString;
+  });
+}); 
+
+
+</script>
+</html>

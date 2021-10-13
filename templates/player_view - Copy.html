@@ -1,0 +1,58 @@
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head> 
+
+Welcome to the Werewolves
+<br>
+<table border="1">
+	<tr>
+		<td style="vertical-align:top">
+			<br><button>refresh</button>
+		</td>
+		<td>
+			<div id="logDisplay" style="overflow:scroll; width:800px; height:400px; font-style: italic; color: green;">
+			</div>
+		</td>
+	</tr>
+</table>
+
+<script>
+var latest = 0;
+
+function appendEventLog(divID, newEventID, newEventDescription, newEventTimestamp) {
+	var div1 = document.getElementById(divID);
+	div1.innerHTML = div1.innerHTML + "<br>" +
+										"<span style='color: blue'>" + newEventID + ". &nbsp;&nbsp;</span>" + 
+										"<span style='color: green'>" + newEventDescription + "&nbsp;&nbsp;</span>" +
+										"<span style='color: red'>[" + newEventTimestamp + "]</span>";
+	div1.scrollTop = div1.scrollHeight;	//scrolls to the bottom so that latest events are displayed
+}
+
+$("button").click(function(){
+  $.get("./getEventLogs?latest="+latest, function(data, status){
+  	logs = JSON.parse(data);
+  	latest += logs.length;
+  	for (const log of logs)
+	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
+  });
+}); 
+
+function refresh() {
+
+  $.get("./getEventLogs?latest="+latest, function(data, status){
+  	logs = JSON.parse(data);
+  	alert(JSON.stringify(logs));
+  	latest += logs.length;
+  	for (const log of logs)
+	  	appendEventLog("logDisplay", JSON.stringify(log)+"aaa");
+  });
+
+  setTimeout(refresh, 5000);
+}
+
+//refresh();
+
+
+</script>
+</html>
