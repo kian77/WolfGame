@@ -1,5 +1,6 @@
 from django.db import models
 import json
+import random
 from enum import Enum
 from datetime import datetime
 
@@ -42,19 +43,19 @@ class GameState(str, Enum):
 	GAME_END = "GAME_END"
 
 
-class GoodRole(str, Enum):
+class GoodRole(str):
 	PEASANT = "PEASANT"
 	SEER = "SEER"
 	WITCH = "WITCH"
 	KNIGHT = "KNIGHT"
 	HUNTER = "HUNTER"
 
-class BadRole(str, Enum):
+class BadRole(str):
 	WOLF = "WOLF"
 	WOLF_KING = "WOLF_KING"
 	SNOW_WOLF = "SNOW_WOLF"
 
-class PlayerState(str, Enum):
+class PlayerState(str):
 	ALIVE = "ALIVE"				#also implied alive with all skills available (eg, for Knight and Witch)
 	DEAD = "DEAD"
 	ALIVE_WITHOUT_SKILL = "ALIVE_WITHOUT_SKILL"	#also implied witch without antidote and poison
@@ -77,8 +78,9 @@ class WolfGame:
 		self.players = []	# {"name":value, "timeJoined":value}
 
 		#after randomization
-		self.playerRoleAssignments = []
-				# {"playerNumber":value, "name":value, "role":value, "state":value }
+		self.gamePlayersName = []
+		self.gamePlayersRoles = []
+		self.gamePlayersState = [] #XY
 
 		self.actionCounter = 0
 		self.actions = []	# {"id":value, "actor":value, "actorRole":value, "actionType":value, "action":value, "timestamp":value}
@@ -86,6 +88,12 @@ class WolfGame:
 		self.eventCounter = 0
 		self.eventLogs = []	# {"id":value, "description":value, "timestamp":value}
 
+
+	def updateLog(self,logDetails):
+		now = datetime.now()
+		currentTime = now.strftime("%H:%M:%S")
+		self.eventLogs.append({"id":self.eventCounter, "description":logDetails, "timestamp":currentTime})
+		self.eventCounter = self.eventCounter + 1
 
 	def addLog(self, newEventLog):
 		self.eventLogs.append(newEventLog)
@@ -144,6 +152,20 @@ class WolfGame:
 			actionResponse = self.joinGame(p1, p2)
 		elif (action=="openGame"):
 			actionResponse = self.openGame(p1, p2)
+		elif (action=="startGame"):#XY
+			actionResponse = self.startGame()
+		elif (action=="wolfKill"):#XY
+			actionResponse = self.updateGame(GameState.WOLF_PHASE_END, p1, PlayerState.DEAD, GameState.WITCH_PHASE_BEGIN)
+		elif (action=="witchActions"):#XY
+			if (str(p1) == "Yes"):
+				indexWitch = self.gamePlayersRoles.index(GoodRole.WITCH); #update witch to antidote used
+				self.updateGame(GameState.WITCH_PHASE_BEGIN,indexWitch+1,PlayerState.ALIVE_WITHOUT_ANTIDOTE, GameState.WITCH_PHASE_END)
+				if (str(p2) != str(indexWitch+1)):
+					print ("p2 = " + str(p2) + " and indexWitch+1 " + str(indexWitch+1))
+					actionResponse = self.updateGame(GameState.WITCH_PHASE_END, p2, PlayerState.ALIVE, GameState.SEER_PHASE_BEGIN)
+			elif (str(p1) == "No" and str(p3) != ""):
+				actionResponse = self.updateGame(GameState.WITCH_PHASE_END, p3, PlayerState.DEAD, GameState.SEER_PHASE_BEGIN)
+	
 
 		actionResponse['eventLogs'] = self.getLog(int(startFrom))
 		#print(json.dumps(actionResponse))
@@ -155,10 +177,7 @@ class WolfGame:
 
 		self.roles.append(rolesSelected)
 
-		now = datetime.now()
-		currentTime = now.strftime("%H:%M:%S")
-		self.eventLogs.append({"id":self.eventCounter, "description":"Game Initiated", "timestamp":currentTime})
-		self.eventCounter = self.eventCounter + 1
+		self.updateLog("Game Initiated - " + str(rolesSelected)) #xy
 
 		self.currentGameState = GameState.GAME_INITIATED
 		actionResponse['systemMessage'] = "Success"
@@ -182,10 +201,7 @@ class WolfGame:
 			self.gameName = p2
 			self.numberOfPlayers = int(p3)
 
-			now = datetime.now()
-			currentTime = now.strftime("%H:%M:%S")
-			self.eventLogs.append({"id":self.eventCounter, "description":"Game Created", "timestamp":currentTime})
-			self.eventCounter = self.eventCounter + 1
+			self.updateLog("Game Created") #xy
 
 			self.currentGameState = GameState.GAME_CREATED
 			actionResponse['systemMessage'] = "Success"
@@ -201,15 +217,77 @@ class WolfGame:
 
 		actionResponse = {}
 
+
 		#state must be in GAME_INITIATED, throw error otherwise
-		if (self.currentGameState!=GameState.GAME_INITIATED):
+		if (self.currentGameState!=GameState.GAME_CREATED):
 			actionResponse['systemMessage'] = "User Error. Cannot join game (incorrect game state)"
 		else:
 			actionResponse['systemMessage'] = "Join Successfully"
+			self.players.append(p1)
+			self.updateLog(p1 + " joined game #" + p2) #xy
+			self.updateLog("Current Players (" + str(len(self.players)) + "):" + str(self.players)) #xy
+
+		actionResponse['gameState'] = self.currentGameState
+		return actionResponse
+#xy
+
+	def randomize(self):
+		#randomize not working
+		self.gamePlayersRoles = self.roles
+		print("XY Before " + str(self.gamePlayersRoles))
+		random.shuffle(self.gamePlayersRoles)
+		print("XY After " + str(self.gamePlayersRoles))
+
+
+	def roleAssignment(self,playerNo,name,role,state):
+		print("XY     " + role)
+		self.gamePlayersName.append(name)
+		self.gamePlayersRoles.append(str(role))
+		self.gamePlayersState.append(str(state))
+
+	def startGame(self):
+		actionResponse = {}
+		self.roleAssignment(1,"Sam",GoodRole.SEER,PlayerState.ALIVE)		
+		self.roleAssignment(2,"Zotong",BadRole.WOLF_KING,PlayerState.ALIVE)		
+		self.roleAssignment(3,"Kian",GoodRole.WITCH,PlayerState.ALIVE)		
+#		self.randomize()
+
+		self.updateLog("Game Started" + str(self.gamePlayersName) + " " + str(self.gamePlayersRoles)) #xy
+
+		#state must be in GAME_INITIATED, throw error otherwise
+		if (self.currentGameState!=GameState.GAME_INITIATED):
+			actionResponse['systemMessage'] = "Error. Cannot start game (incorrect game state)"
+		else:
+			self.currentGameState = GameState.GAME_STARTED
+			self.currentGameState = GameState.WOLF_PHASE_BEGIN
+			actionResponse['systemMessage'] = "Start Successfully"
 
 		actionResponse['gameState'] = self.currentGameState
 		return actionResponse
 
+	def updateGame(self, action, selectedPlayer, stateOfPlayer, nextStage):
+		self.updateLog(action+" " + str(selectedPlayer) + " " + stateOfPlayer + " " + nextStage)
+
+		actionResponse = {}
+
+		now = datetime.now()
+		currentTime = now.strftime("%H:%M:%S")
+
+		if (selectedPlayer != ""):
+
+			self.gamePlayersState[int(selectedPlayer)-1] = stateOfPlayer
+			
+			self.eventLogs.append({"id":self.eventCounter, "description":action + " - Selected " + str(selectedPlayer), "timestamp":currentTime})
+			self.eventCounter = self.eventCounter + 1
+			self.updateLog(action + " - Current Status <br/>" + str(self.gamePlayersName) + "<br/>" + str(self.gamePlayersRoles) + "<br/>" + str(self.gamePlayersState)) #xy
+		else:
+			self.eventLogs.append({"id":self.eventCounter, "description":action + " - No Player Selected ", "timestamp":currentTime})
+			self.eventCounter = self.eventCounter + 1
+
+		self.currentGameState = nextStage
+		actionResponse['systemMessage'] = "Success"
+		actionResponse['gameState'] = self.currentGameState
+		return actionResponse
 
 #		self.currentGameState = GameState.GAME_NOT_CREATED
 

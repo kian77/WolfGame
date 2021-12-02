@@ -1,4 +1,7 @@
 <html>
+{% load static %}
+<img src = "{% static '/images/banner.png' %}" width="500" class="d-inline-block align-top">
+<br>
 
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
@@ -8,16 +11,29 @@
 
 Player Console
 <br>
-<div id="logDisplay" style="overflow:scroll; width:800px; height:400px; font-style: italic; color: green;">
+<div id="logDisplay" style="overflow:scroll; width:800px; height:300px; font-style: italic; color: green;">
 </div>
 
 <br>
 <div>
-	<br><button id="updateLog">Update</button>
+	<br><button id="updateLog">Update Logs</button>
 
 	<br>
 	<div id="LANDING">
-			<br>Your Name: <input type="text" id="playerName" size="30">
+			<br>Your Name: <select id="playerName">
+				<option value="Alvin">Alvin</option>
+				<option value="Guo Zheng">Guo Zheng</option>
+				<option value="Inez">Inez</option>
+				<option value="Jun Wei">Jun Wei</option>
+				<option value="Kian">Kian</option>
+				<option value="Michelle">Michelle</option>
+				<option value="PK">PK</option>
+				<option value="Rae">Rae</option>
+				<option value="Sam">Sam</option>
+				<option value="Shawn">Shawn</option>
+				<option value="Song">Song</option>
+				<option value="Zotong">Zotong</option>
+			</select>
 			<br>Joining Game (provided by host): <input type="text" id="gameName" size="30">
 			<br><button id="joinGame">Join Game</button>		
 	</div>
