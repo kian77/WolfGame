@@ -10,6 +10,8 @@ from .views import hostView
 from .views import sendAction
 from django.contrib import admin
 from django.urls import path, include # new
+from django.contrib.staticfiles.storage import staticfiles_storage
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -21,6 +23,10 @@ urlpatterns = [
     path('wolves/superAdminUI', superAdminUI, name="superAdminUI"),
     path('wolves/getGameModel', getGameModel, name="getGameModel"),
     path('wolves/host5990', hostView, name="hostView"),
-    path('wolves/sendAction', sendAction, name="sendAction")
+    path('wolves/sendAction', sendAction, name="sendAction"),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=staticfiles_storage.url("favicon.ico"))
+    ),
 
 ]
