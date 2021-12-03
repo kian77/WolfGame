@@ -21,12 +21,12 @@ Host Console2
 	<div id="GAME_NOT_CREATED">
 			<br>Your Name: <input type="text" id="hostName" size="30" value="XY">
 			<br>Game Name: <input type="text" id="gameName" size="30" value="Game 1">
-			<br>Number of Players: <input type="number" id="numberOfPlayers" size="2" value="3">
+			<br>Number of Players: <input type="number" id="numberOfPlayers" size="2" value="6">
 			<br><button id="createGame">Create Game</button>		
 	</div>
 	<div id="GAME_CREATED">
-		<br>Number of Players : <span id="showNumberOfPlayers">123</span>
-		<br>Please select roles to be included (<span id="showNumberOfRolesSelected">0</span> roles selected)
+		<br>Number of Players : <span id="showNumberOfPlayers"></span>
+		<br>Please select roles to be included (<span id="showNumberOfRolesSelected"></span> roles selected)
 		<select id="rolesSelected" multiple="multiple" class="4colactive">
         <option value="PEASANT1">平民</option>	
         <option value="PEASANT2" selected="selected">平民</option>	
@@ -65,6 +65,7 @@ Host Console2
 			<br><button id="seerCheck">Check</button>		
 	</div>
 	<div id="DAY_BEGIN">
+			DAY LIGHT - Announcement: 
 			<div id="dayAnnouncement"></div>
 			<br><button id="seerCheck">Check</button>		
 	</div>
@@ -106,6 +107,8 @@ function createGame() {
   	actionResponse = JSON.parse(data);
   	$("#systemMessage").html(actionResponse.systemMessage);
     $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
+    $("#showNumberOfRolesSelected").html($("#rolesSelected").val().length);
+
     refreshActionDisplay(actionResponse.gameState);
     refresh();
 

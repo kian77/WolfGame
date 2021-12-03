@@ -74,7 +74,7 @@ class WolfGame:
 		#roles used for this game
 		self.roles = []
 
-		self.players = []	# {"name":value, "timeJoined":value}
+		self.players = ["Alvin","Guo Zheng","Inez","Jun Wei","Michelle","Sam"]	# {"name":value, "timeJoined":value}
 
 		#after randomization
 		self.gamePlayersName = []
@@ -260,25 +260,28 @@ class WolfGame:
 #xy
 
 	def randomize(self):
-		#randomize not working
 		self.gamePlayersRoles = self.roles
-		print("XY Before " + str(self.gamePlayersRoles))
 		random.shuffle(self.gamePlayersRoles)
-		print("XY After " + str(self.gamePlayersRoles))
+
+		self.gamePlayersName = self.players
+		random.shuffle(self.gamePlayersName)
+
+		i = 0
+		for i in range(len(self.gamePlayersName)):
+			self.gamePlayersState.append(PlayerState.ALIVE)
 
 
 	def roleAssignment(self,playerNo,name,role,state):
-		print("XY     " + role)
 		self.gamePlayersName.append(name)
 		self.gamePlayersRoles.append(str(role))
 		self.gamePlayersState.append(str(state))
 
 	def startGame(self):
 		actionResponse = {}
-		self.roleAssignment(1,"Sam",GoodRole.SEER,PlayerState.ALIVE)		
-		self.roleAssignment(2,"Zotong",BadRole.WOLF_KING,PlayerState.ALIVE)		
-		self.roleAssignment(3,"Kian",GoodRole.WITCH,PlayerState.ALIVE)		
-#		self.randomize()
+#		self.roleAssignment(1,"Sam",GoodRole.SEER,PlayerState.ALIVE)		
+#		self.roleAssignment(2,"Zotong",BadRole.WOLF_KING,PlayerState.ALIVE)		
+#		self.roleAssignment(3,"Kian",GoodRole.WITCH,PlayerState.ALIVE)		
+		self.randomize()
 
 		self.updateLog("Game Started" + str(self.gamePlayersName) + " " + str(self.gamePlayersRoles), "Yes") #xy
 
@@ -319,8 +322,6 @@ class WolfGame:
 
 
 	def updateGameState(self, currentGameState, overrideGameState):
-		print ("currentGameState: " + currentGameState + " and overrideGameState: " + GameState.WITCH_PHASE_BEGIN)
-		print (currentGameState == GameState.WITCH_PHASE_BEGIN)
 		if (overrideGameState != ""):
 			self.currentGameState = overrideGameState
 		elif (currentGameState == GameState.GAME_INITIATED):
