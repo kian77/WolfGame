@@ -8,16 +8,19 @@ from .views import superAdminUI
 from .views import getGameModel
 from .views import hostView
 from .views import sendAction
+from django.contrib import admin
+from django.urls import path, include # new
 
 urlpatterns = [
-    path('', homePageView, name='home'),
-    path('getEventLogs', getEventLogs, name="getEventLogs"),
-    path('getHostEventLogs', getHostEventLogs, name="getHostEventLogs"),
-    path('addLogUI', addLogUI, name="addLogUI"),
-    path('addLog', addLog, name="addLog"),
-    path('superAdminUI', superAdminUI, name="superAdminUI"),
-    path('getGameModel', getGameModel, name="getGameModel"),
-    path('host5990', hostView, name="hostView"),
-    path('sendAction', sendAction, name="sendAction")
+    path('admin/', admin.site.urls),
+    path('wolves/', homePageView, name='home'),
+    path('wolves/getEventLogs', getEventLogs, name="getEventLogs"),
+    path('wolves/getHostEventLogs', getHostEventLogs, name="getHostEventLogs"),
+    path('wolves/addLogUI', addLogUI, name="addLogUI"),
+    path('wolves/addLog', addLog, name="addLog"),
+    path('wolves/superAdminUI', superAdminUI, name="superAdminUI"),
+    path('wolves/getGameModel', getGameModel, name="getGameModel"),
+    path('wolves/host5990', hostView, name="hostView"),
+    path('wolves/sendAction', sendAction, name="sendAction")
 
 ]
