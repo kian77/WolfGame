@@ -11,6 +11,8 @@
 
 Player Console
 <br>
+<div id="showPlayerInformation"></div>
+<br>
 <div id="logDisplay" style="overflow:scroll; width:800px; height:300px; font-style: italic; color: green;">
 </div>
 
@@ -73,17 +75,14 @@ function joinGame() {
   	//alert("["+data+"]");
   	actionResponse = JSON.parse(data);
   	$("#systemMessage").html(actionResponse.systemMessage);
-  	logs = actionResponse.eventLogs;
-  	latest += logs.length;
-  	for (const log of logs)
-	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
-	  $("#showNumberOfPlayers").html($("#numberOfPlayers").val());
+	  $("#showPlayerInformation").html("Welcome "+$("#playerName").val().trim() + ". Current Number of Players: "+actionResponse.numberOfPlayers);
 	  refreshActionDisplay(actionResponse.gameState);
+	    refresh();
   });
 }
 
 function refreshActionDisplay(gameState) {
-	var actionCards = [ "GAME_NOT_CREATED", "GAME_CREATED"];
+	var actionCards = [ "LANDING", "GAME_CREATED"];
 
 	for (const card of actionCards) {
 			if (gameState==card) {

@@ -88,15 +88,27 @@ class WolfGame:
 		self.eventCounter = 0
 		self.eventLogs = []	# {"id":value, "description":value, "timestamp":value}
 
+		self.hostOnlyEventCounter = 0
+		self.hostOnlyEventLogs = []
 
-	def updateLog(self,logDetails):
+	def updateLog(self,logDetails,hostOnly):
 		now = datetime.now()
 		currentTime = now.strftime("%H:%M:%S")
-		self.eventLogs.append({"id":self.eventCounter, "description":logDetails, "timestamp":currentTime})
-		self.eventCounter = self.eventCounter + 1
+		if (hostOnly!="Yes"):
+			self.eventLogs.append({"id":self.eventCounter, "description":logDetails, "timestamp":currentTime})
+			self.eventCounter = self.eventCounter + 1
+		self.hostOnlyEventLogs.append({"id":self.hostOnlyEventCounter, "description":logDetails, "timestamp":currentTime})
+		self.hostOnlyEventCounter = self.hostOnlyEventCounter + 1
 
 	def addLog(self, newEventLog):
 		self.eventLogs.append(newEventLog)
+
+	def getSpecificLog(self, startFrom, logName):
+		copy = logName.copy()
+		for i in range(0,startFrom):
+			#print(">>>"+str(i)+"<<<?>>>"+str(startFrom)+"<<<")
+			copy.pop(0)
+		return copy
 
 	def getLog(self, startFrom):
 		copy = self.eventLogs.copy()
@@ -106,7 +118,10 @@ class WolfGame:
 		return copy
 
 	def getLogAsString(self, startFrom):
-		return json.dumps(self.getLog(startFrom))
+		return json.dumps(self.getSpecificLog(startFrom,self.eventLogs))
+
+	def getHostLogAsString(self, startFrom):
+		return json.dumps(self.getSpecificLog(startFrom,self.hostOnlyEventLogs))
 
 	def getGameModel(self):
 		return json.dumps(self.__dict__)
@@ -167,7 +182,7 @@ class WolfGame:
 				actionResponse = self.updateGame(GameState.WITCH_PHASE_END, p3, PlayerState.DEAD, GameState.SEER_PHASE_BEGIN)
 	
 
-		actionResponse['eventLogs'] = self.getLog(int(startFrom))
+#		actionResponse['eventLogs'] = self.getLog(int(startFrom))
 		#print(json.dumps(actionResponse))
 		return json.dumps(actionResponse)
 
@@ -177,7 +192,7 @@ class WolfGame:
 
 		self.roles.append(rolesSelected)
 
-		self.updateLog("Game Initiated - " + str(rolesSelected)) #xy
+		self.updateLog("Game Initiated - " + str(rolesSelected), "No") #xy
 
 		self.currentGameState = GameState.GAME_INITIATED
 		actionResponse['systemMessage'] = "Success"
@@ -201,7 +216,7 @@ class WolfGame:
 			self.gameName = p2
 			self.numberOfPlayers = int(p3)
 
-			self.updateLog("Game Created") #xy
+			self.updateLog("Game Created", "No") #xy
 
 			self.currentGameState = GameState.GAME_CREATED
 			actionResponse['systemMessage'] = "Success"
@@ -224,8 +239,9 @@ class WolfGame:
 		else:
 			actionResponse['systemMessage'] = "Join Successfully"
 			self.players.append(p1)
-			self.updateLog(p1 + " joined game #" + p2) #xy
-			self.updateLog("Current Players (" + str(len(self.players)) + "):" + str(self.players)) #xy
+			self.updateLog(p1 + " joined game #" + p2, "No") #xy
+			self.updateLog("Current Players (" + str(len(self.players)) + "):" + str(self.players), "No") #xy
+			actionResponse['numberOfPlayers'] = str(len(self.players))
 
 		actionResponse['gameState'] = self.currentGameState
 		return actionResponse
@@ -252,7 +268,7 @@ class WolfGame:
 		self.roleAssignment(3,"Kian",GoodRole.WITCH,PlayerState.ALIVE)		
 #		self.randomize()
 
-		self.updateLog("Game Started" + str(self.gamePlayersName) + " " + str(self.gamePlayersRoles)) #xy
+		self.updateLog("Game Started" + str(self.gamePlayersName) + " " + str(self.gamePlayersRoles), "Yes") #xy
 
 		#state must be in GAME_INITIATED, throw error otherwise
 		if (self.currentGameState!=GameState.GAME_INITIATED):
@@ -266,7 +282,7 @@ class WolfGame:
 		return actionResponse
 
 	def updateGame(self, action, selectedPlayer, stateOfPlayer, nextStage):
-		self.updateLog(action+" " + str(selectedPlayer) + " " + stateOfPlayer + " " + nextStage)
+		self.updateLog(action+" " + str(selectedPlayer) + " " + stateOfPlayer + " " + nextStage, "Yes")
 
 		actionResponse = {}
 
@@ -277,12 +293,12 @@ class WolfGame:
 
 			self.gamePlayersState[int(selectedPlayer)-1] = stateOfPlayer
 			
-			self.eventLogs.append({"id":self.eventCounter, "description":action + " - Selected " + str(selectedPlayer), "timestamp":currentTime})
-			self.eventCounter = self.eventCounter + 1
-			self.updateLog(action + " - Current Status <br/>" + str(self.gamePlayersName) + "<br/>" + str(self.gamePlayersRoles) + "<br/>" + str(self.gamePlayersState)) #xy
+			self.hostOnlyEventLogs.append({"id":self.hostOnlyEventCounter, "description":action + " - Selected " + str(selectedPlayer), "timestamp":currentTime})
+			self.hostOnlyEventCounter = self.hostOnlyEventCounter + 1
+			self.updateLog(action + " - Current Status <br/>" + str(self.gamePlayersName) + "<br/>" + str(self.gamePlayersRoles) + "<br/>" + str(self.gamePlayersState), "Yes") #xy
 		else:
-			self.eventLogs.append({"id":self.eventCounter, "description":action + " - No Player Selected ", "timestamp":currentTime})
-			self.eventCounter = self.eventCounter + 1
+			self.hostOnlyEventLogs.append({"id":self.hostOnlyEventCounter, "description":action + " - No Player Selected ", "timestamp":currentTime})
+			self.hostOnlyEventCounter = self.hostOnlyEventCounter + 1
 
 		self.currentGameState = nextStage
 		actionResponse['systemMessage'] = "Success"

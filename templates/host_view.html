@@ -55,7 +55,7 @@ Host Console2
 			<br><button id="wolfKill">Wolf Kill #</button>		
 	</div>
 	<div id="WITCH_PHASE_BEGIN">
-			<div id="wolfVictimAnnounement"></div>
+			<div id="wolfVictimAnnouncement"></div>
 			<br>Save? <input type="radio" id="witchSave" name="witchSave" value="No" checked="checked" />No <input type="radio" id="witchSave" name="witchSave" value="Yes">Yes 
 			<br>Witch Poison? <input type="number" id="witchPoison" size="2">
 			<br><button id="witchActions">Submit Witch Actions</button>		
@@ -80,7 +80,7 @@ function appendEventLog(divID, newEventID, newEventDescription, newEventTimestam
 $("#updateLog").click(function() { refresh(); }); 
 
 function refresh() {
-  $.get("./getEventLogs?latest="+latest, function(data, status){
+  $.get("./getHostEventLogs?latest="+latest, function(data, status){
   	logs = JSON.parse(data);
   	latest += logs.length;
   	for (const log of logs)
@@ -94,12 +94,10 @@ function createGame() {
   $.get("./sendAction?latest="+latest+"&action=createGame&p1="+$("#hostName").val().trim()+"&p2="+$("#gameName").val().trim()+"&p3="+$("#numberOfPlayers").val().trim(), function(data, status){
   	actionResponse = JSON.parse(data);
   	$("#systemMessage").html(actionResponse.systemMessage);
-  	logs = actionResponse.eventLogs;
-  	latest += logs.length;
-  	for (const log of logs)
-	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
-	  $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
-	  refreshActionDisplay(actionResponse.gameState);
+    $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
+    refreshActionDisplay(actionResponse.gameState);
+    refresh();
+
   });
 }
 
@@ -121,13 +119,10 @@ function openGame() {
 //			alert(data);
 			actionResponse = JSON.parse(data);
 	  	$("#systemMessage").html(actionResponse.systemMessage);
-	  	logs = actionResponse.eventLogs;
-	  	latest += logs.length;
-	  	for (const log of logs)
-		  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
-		  $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
-		  refreshActionDisplay(actionResponse.gameState);
-			}
+  	    $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
+		refreshActionDisplay(actionResponse.gameState);
+	    refresh();
+		}
 	});
 
 }
@@ -163,17 +158,14 @@ function gameActions(action,p1,p2,p3) {
   	//alert("["+data+"]");
   	actionResponse = JSON.parse(data);
   	$("#systemMessage").html(actionResponse.systemMessage);
-  	logs = actionResponse.eventLogs;
-  	latest += logs.length;
-  	for (const log of logs)
-	  	appendEventLog("logDisplay", log.id, log.description, log.timestamp);
 	  $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
 	  refreshActionDisplay(actionResponse.gameState);
+	    refresh();
   });
 }
 
 $("#startGame").click(function() { gameActions("startGame","","",""); }); 
-$("#wolfKill").click(function() { gameActions("wolfKill",$("#wolfVictim").val().trim(),"",""); 	wolfVictimAnnounement.innerHTML = "Wolf Victim is #" + $("#wolfVictim").val().trim();
+$("#wolfKill").click(function() { gameActions("wolfKill",$("#wolfVictim").val().trim(),"",""); 	wolfVictimAnnouncement.innerHTML = "Wolf Victim is #" + $("#wolfVictim").val().trim();
 }); 
 $("#witchActions").click(function() { gameActions("witchActions",$('input[name=witchSave]:checked').val(),$("#wolfVictim").val().trim(),$("#witchPoison").val().trim()); }); 
 

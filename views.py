@@ -11,6 +11,10 @@ def homePageView(request):
     context = {}
     return HttpResponse(template.render(context, request))
 
+def getHostEventLogs(request):
+    latest = int(request.GET.get("latest"))
+    return HttpResponse(wg.getHostLogAsString(latest))
+
 def getEventLogs(request):
     latest = int(request.GET.get("latest"))
     return HttpResponse(wg.getLogAsString(latest))
