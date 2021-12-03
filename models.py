@@ -62,7 +62,6 @@ class PlayerState(str):
 	ALIVE_WITHOUT_ANTIDOTE = "ALIVE_WITHOUT_ANTIDOTE"
 	ALIVE_WITHOUT_POISON = "ALIVE_WITHOUT_POISON"
 
-
 class WolfGame:
 
 	def __init__(self):
@@ -90,6 +89,8 @@ class WolfGame:
 
 		self.hostOnlyEventCounter = 0
 		self.hostOnlyEventLogs = []
+
+		self.dayAnnouncementPreparation = []
 
 	def updateLog(self,logDetails,hostOnly):
 		now = datetime.now()
@@ -170,17 +171,24 @@ class WolfGame:
 		elif (action=="startGame"):#XY
 			actionResponse = self.startGame()
 		elif (action=="wolfKill"):#XY
-			actionResponse = self.updateGame(GameState.WOLF_PHASE_END, p1, PlayerState.DEAD, GameState.WITCH_PHASE_BEGIN)
+			actionResponse = self.updateGame(GameState.WOLF_PHASE_END, p1, PlayerState.DEAD,"")
+			if (p1 != ""):
+				self.dayAnnouncementPreparation.append(p1)
 		elif (action=="witchActions"):#XY
 			if (str(p1) == "Yes"):
 				indexWitch = self.gamePlayersRoles.index(GoodRole.WITCH); #update witch to antidote used
-				self.updateGame(GameState.WITCH_PHASE_BEGIN,indexWitch+1,PlayerState.ALIVE_WITHOUT_ANTIDOTE, GameState.WITCH_PHASE_END)
 				if (str(p2) != str(indexWitch+1)):
+					self.dayAnnouncementPreparation.remove(p2)
 					print ("p2 = " + str(p2) + " and indexWitch+1 " + str(indexWitch+1))
-					actionResponse = self.updateGame(GameState.WITCH_PHASE_END, p2, PlayerState.ALIVE, GameState.SEER_PHASE_BEGIN)
+					self.updateGame(GameState.WITCH_PHASE_END, p2, PlayerState.ALIVE,GameState.WITCH_PHASE_BEGIN) #dun override the state, when witch update state will update
+				actionResponse = self.updateGame(GameState.WITCH_PHASE_BEGIN,indexWitch+1,PlayerState.ALIVE_WITHOUT_ANTIDOTE,"")
 			elif (str(p1) == "No" and str(p3) != ""):
-				actionResponse = self.updateGame(GameState.WITCH_PHASE_END, p3, PlayerState.DEAD, GameState.SEER_PHASE_BEGIN)
-	
+				actionResponse = self.updateGame(GameState.WITCH_PHASE_END, p3, PlayerState.DEAD,"")
+				self.dayAnnouncementPreparation.append(p3)
+			elif (str(p1) == "No" and str(p3) == ""):
+				actionResponse = self.updateGame(GameState.WITCH_PHASE_END, "", "","")
+		elif (action=="seerCheck"):
+			actionResponse = self.updateGame(GameState.SEER_PHASE_END, p1,"","")
 
 #		actionResponse['eventLogs'] = self.getLog(int(startFrom))
 		#print(json.dumps(actionResponse))
@@ -190,9 +198,10 @@ class WolfGame:
 
 		actionResponse = {}
 
-		self.roles.append(rolesSelected)
+		for x in rolesSelected:
+			self.roles.append(x[0:len(x)-1])
 
-		self.updateLog("Game Initiated - " + str(rolesSelected), "No") #xy
+		self.updateLog("Game Initiated - " + str(self.roles), "No") #xy
 
 		self.currentGameState = GameState.GAME_INITIATED
 		actionResponse['systemMessage'] = "Success"
@@ -237,11 +246,14 @@ class WolfGame:
 		if (self.currentGameState!=GameState.GAME_CREATED):
 			actionResponse['systemMessage'] = "User Error. Cannot join game (incorrect game state)"
 		else:
-			actionResponse['systemMessage'] = "Join Successfully"
-			self.players.append(p1)
-			self.updateLog(p1 + " joined game #" + p2, "No") #xy
-			self.updateLog("Current Players (" + str(len(self.players)) + "):" + str(self.players), "No") #xy
-			actionResponse['numberOfPlayers'] = str(len(self.players))
+			if (self.gameName != p2):
+				actionResponse['systemMessage'] = "User Error. Cannot join game (incorrect game name)"
+			else:
+				actionResponse['systemMessage'] = "Join Successfully"
+				self.players.append(p1)
+				self.updateLog(p1 + " joined game #" + p2, "No") #xy
+				self.updateLog("Current Players (" + str(len(self.players)) + "):" + str(self.players), "No") #xy
+				actionResponse['numberOfPlayers'] = str(len(self.players))
 
 		actionResponse['gameState'] = self.currentGameState
 		return actionResponse
@@ -274,15 +286,14 @@ class WolfGame:
 		if (self.currentGameState!=GameState.GAME_INITIATED):
 			actionResponse['systemMessage'] = "Error. Cannot start game (incorrect game state)"
 		else:
-			self.currentGameState = GameState.GAME_STARTED
-			self.currentGameState = GameState.WOLF_PHASE_BEGIN
+			self.updateGameState(self.currentGameState,"") 
 			actionResponse['systemMessage'] = "Start Successfully"
 
 		actionResponse['gameState'] = self.currentGameState
 		return actionResponse
 
-	def updateGame(self, action, selectedPlayer, stateOfPlayer, nextStage):
-		self.updateLog(action+" " + str(selectedPlayer) + " " + stateOfPlayer + " " + nextStage, "Yes")
+	def updateGame(self, action, selectedPlayer, stateOfPlayer,overrideGameState):
+		self.updateLog(action+" " + str(selectedPlayer) + " " + stateOfPlayer, "Yes")
 
 		actionResponse = {}
 
@@ -290,8 +301,8 @@ class WolfGame:
 		currentTime = now.strftime("%H:%M:%S")
 
 		if (selectedPlayer != ""):
-
-			self.gamePlayersState[int(selectedPlayer)-1] = stateOfPlayer
+			if (stateOfPlayer != ""):
+				self.gamePlayersState[int(selectedPlayer)-1] = stateOfPlayer
 			
 			self.hostOnlyEventLogs.append({"id":self.hostOnlyEventCounter, "description":action + " - Selected " + str(selectedPlayer), "timestamp":currentTime})
 			self.hostOnlyEventCounter = self.hostOnlyEventCounter + 1
@@ -300,10 +311,36 @@ class WolfGame:
 			self.hostOnlyEventLogs.append({"id":self.hostOnlyEventCounter, "description":action + " - No Player Selected ", "timestamp":currentTime})
 			self.hostOnlyEventCounter = self.hostOnlyEventCounter + 1
 
-		self.currentGameState = nextStage
+		self.updateGameState(self.currentGameState,overrideGameState)
 		actionResponse['systemMessage'] = "Success"
 		actionResponse['gameState'] = self.currentGameState
+		actionResponse['dayAnnouncementPreparation'] = self.dayAnnouncementPreparation
 		return actionResponse
+
+
+	def updateGameState(self, currentGameState, overrideGameState):
+		print ("currentGameState: " + currentGameState + " and overrideGameState: " + GameState.WITCH_PHASE_BEGIN)
+		print (currentGameState == GameState.WITCH_PHASE_BEGIN)
+		if (overrideGameState != ""):
+			self.currentGameState = overrideGameState
+		elif (currentGameState == GameState.GAME_INITIATED):
+			self.currentGameState = GameState.GAME_STARTED
+			if(BadRole.WOLF_KING in self.roles or BadRole.WOLF in self.roles or BadRole.SNOW_WOLF in self.roles):
+				self.currentGameState = GameState.WOLF_PHASE_BEGIN
+
+		elif (currentGameState == GameState.WOLF_PHASE_BEGIN):
+			self.currentGameState = GameState.WITCH_PHASE_BEGIN
+
+		elif (currentGameState == GameState.WITCH_PHASE_BEGIN):
+			self.currentGameState = GameState.SEER_PHASE_BEGIN
+
+		elif (currentGameState == GameState.SEER_PHASE_BEGIN):
+			self.currentGameState = GameState.DAY_BEGIN
+
+#		elif (currentGameState == GameState.WITCH_PHASE_BEGIN):
+#			self.currentGameState = GameState.WITCH_PHASE_END
+
+
 
 #		self.currentGameState = GameState.GAME_NOT_CREATED
 

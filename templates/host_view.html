@@ -29,17 +29,17 @@ Host Console2
 		<br>Please select roles to be included (<span id="showNumberOfRolesSelected">0</span> roles selected)
 		<select id="rolesSelected" multiple="multiple" class="4colactive">
         <option value="PEASANT1">平民</option>	
-        <option value="PEASANT2">平民</option>	
-        <option value="PEASANT3">平民</option>	
+        <option value="PEASANT2" selected="selected">平民</option>	
+        <option value="PEASANT3" selected="selected">平民</option>	
         <option value="PEASANT4">平民</option>	
-        <option value="SEER1">预言家</option>	
-        <option value="WITCH1">女巫</option>	
+        <option value="SEER1" selected="selected">预言家</option>	
+        <option value="WITCH1" selected="selected">女巫</option>	
         <option value="HUNTER1">猎人</option>	
         <option value="KNIGHT1">骑士</option>	
         <option value="WOLF1">狼人</option>	
         <option value="WOLF2">狼人</option>	
-        <option value="WOLF3">狼人</option>	
-        <option value="WOLF_KING1">狼王</option>	
+        <option value="WOLF3" selected="selected">狼人</option>	
+        <option value="WOLF_KING1" selected="selected">狼王</option>	
         <option value="WOLF_KING2">狼王</option>	
         <option value="SNOW_WOLF1">雪狼</option>
     </select>
@@ -60,6 +60,17 @@ Host Console2
 			<br>Witch Poison? <input type="number" id="witchPoison" size="2">
 			<br><button id="witchActions">Submit Witch Actions</button>		
 	</div>
+	<div id="SEER_PHASE_BEGIN">
+			<br>Seer Check Who: <input type="number" id="seerCheckWho" size="2">
+			<br><button id="seerCheck">Check</button>		
+	</div>
+	<div id="DAY_BEGIN">
+			<div id="dayAnnouncement"></div>
+			<br><button id="seerCheck">Check</button>		
+	</div>
+
+
+
 	<br><div id="systemMessage" style="font-style: italic; color: red;"></div>
 </div>
 
@@ -127,8 +138,8 @@ function openGame() {
 
 }
 
-function refreshActionDisplay(gameState) {
-	var actionCards = [ "GAME_NOT_CREATED", "GAME_CREATED","WOLF_PHASE_BEGIN","GAME_INITIATED","WITCH_PHASE_BEGIN"]; //XY
+function refreshActionDisplay(gameState,dayAnnouncement) {
+	var actionCards = [ "GAME_NOT_CREATED", "GAME_CREATED","WOLF_PHASE_BEGIN","GAME_INITIATED","WITCH_PHASE_BEGIN","SEER_PHASE_BEGIN","DAY_BEGIN"]; //XY
 
 	for (const card of actionCards) {
 			if (gameState==card) {
@@ -137,6 +148,8 @@ function refreshActionDisplay(gameState) {
 				$("#"+card).hide();				
 			}
 	}
+
+    $("#dayAnnouncement").html(dayAnnouncement + " is dead");
 
 }
 
@@ -159,7 +172,7 @@ function gameActions(action,p1,p2,p3) {
   	actionResponse = JSON.parse(data);
   	$("#systemMessage").html(actionResponse.systemMessage);
 	  $("#showNumberOfPlayers").html(actionResponse.numberOfPlayers);
-	  refreshActionDisplay(actionResponse.gameState);
+	  refreshActionDisplay(actionResponse.gameState,actionResponse.dayAnnouncementPreparation);
 	    refresh();
   });
 }
@@ -168,7 +181,7 @@ $("#startGame").click(function() { gameActions("startGame","","",""); });
 $("#wolfKill").click(function() { gameActions("wolfKill",$("#wolfVictim").val().trim(),"",""); 	wolfVictimAnnouncement.innerHTML = "Wolf Victim is #" + $("#wolfVictim").val().trim();
 }); 
 $("#witchActions").click(function() { gameActions("witchActions",$('input[name=witchSave]:checked').val(),$("#wolfVictim").val().trim(),$("#witchPoison").val().trim()); }); 
-
+$("#seerCheck").click(function() { gameActions("seerCheck",$("#seerCheckWho").val().trim(),"",""); });
 
 
 </script>

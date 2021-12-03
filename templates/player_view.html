@@ -75,9 +75,12 @@ function joinGame() {
   	//alert("["+data+"]");
   	actionResponse = JSON.parse(data);
   	$("#systemMessage").html(actionResponse.systemMessage);
-	  $("#showPlayerInformation").html("Welcome "+$("#playerName").val().trim() + ". Current Number of Players: "+actionResponse.numberOfPlayers);
-	  refreshActionDisplay(actionResponse.gameState);
+  	if(actionResponse.systemMessage == "Join Successfully") {
+		$("#showPlayerInformation").html("Welcome "+$("#playerName").val().trim() + ". Current Number of Players: "+actionResponse.numberOfPlayers);
+		refreshActionDisplay(actionResponse.gameState);
 	    refresh();
+
+  	}
   });
 }
 

@@ -24,9 +24,7 @@ urlpatterns = [
     path('wolves/getGameModel', getGameModel, name="getGameModel"),
     path('wolves/host5990', hostView, name="hostView"),
     path('wolves/sendAction', sendAction, name="sendAction"),
-    path(
-        "favicon.ico",
-        RedirectView.as_view(url=staticfiles_storage.url("favicon.ico"))
+    path("favicon.ico", RedirectView.as_view(url=staticfiles_storage.url("favicon.ico"))
     ),
 
 ]
